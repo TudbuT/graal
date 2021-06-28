@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.oracle.graal.pointsto.BigBang;
+import com.oracle.graal.pointsto.StaticAnalysisEngine;
 import com.oracle.graal.pointsto.flow.InvokeTypeFlow;
 import com.oracle.graal.pointsto.meta.AnalysisMethod;
 
@@ -53,8 +53,8 @@ import jdk.vm.ci.meta.ResolvedJavaMethod;
 
 public final class CallTreePrinter {
 
-    public static void print(BigBang bigbang, String reportsPath, String reportName) {
-        CallTreePrinter printer = new CallTreePrinter(bigbang);
+    public static void print(StaticAnalysisEngine analysis, String reportsPath, String reportName) {
+        CallTreePrinter printer = new CallTreePrinter(analysis);
         printer.buildCallTree();
 
         ReportUtils.report("call tree", reportsPath, "call_tree_" + reportName, "txt",
@@ -139,11 +139,11 @@ public final class CallTreePrinter {
         }
     }
 
-    private final BigBang bigbang;
+    private final StaticAnalysisEngine analysis;
     private final Map<AnalysisMethod, MethodNode> methodToNode;
 
-    public CallTreePrinter(BigBang bigbang) {
-        this.bigbang = bigbang;
+    public CallTreePrinter(StaticAnalysisEngine analysis) {
+        this.analysis = analysis;
         /* Use linked hash map for predictable iteration order. */
         this.methodToNode = new LinkedHashMap<>();
     }
@@ -151,7 +151,7 @@ public final class CallTreePrinter {
     public void buildCallTree() {
 
         /* Add all the roots to the tree. */
-        bigbang.getUniverse().getMethods().stream()
+        analysis.getUniverse().getMethods().stream()
                         .filter(m -> m.isRootMethod() && !methodToNode.containsKey(m))
                         .sorted(methodComparator)
                         .forEach(method -> methodToNode.put(method, new MethodNode(method, true)));
@@ -166,6 +166,7 @@ public final class CallTreePrinter {
              * Process the method: iterate the invokes, for each invoke iterate the callees, if the
              * callee was not already processed add it to the tree and to the work list.
              */
+            // todo(d-kozak) use points-to independent way of accessing callees
             node.method.getTypeFlow().getInvokes().stream()
                             .sorted(invokeComparator)
                             .forEach(invoke -> processInvoke(invoke, node, workList));
