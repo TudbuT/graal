@@ -104,4 +104,6 @@ public interface StaticAnalysisEngine {
     AnalysisType forClass(Class<?> clazz);
 
     AnalysisType forClass(String className);
+
+    void handleJNIAccess(AnalysisField field, boolean writable);
 }

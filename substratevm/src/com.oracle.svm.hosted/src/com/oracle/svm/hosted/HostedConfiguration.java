@@ -181,8 +181,9 @@ public class HostedConfiguration {
                 return new StaticAnalysisResultsBuilder(bb, universe);
             }
         } else {
-            // todo(d-kozak) is there anything from reachability worth applying?
+            // todo(d-kozak) what to apply from reachability?
             // invokes with a single instantiated receiver type etc?
+            // Should custom results builder be created for this purpose?
             throw VMError.shouldNotReachHere("Unsupported analysis type");
         }
     }

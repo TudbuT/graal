@@ -36,7 +36,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import com.oracle.svm.core.util.VMError;
 import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
 import org.graalvm.compiler.api.replacements.Fold;
 import org.graalvm.compiler.options.Option;
@@ -44,9 +43,6 @@ import org.graalvm.nativeimage.ImageSingletons;
 import org.graalvm.nativeimage.hosted.Feature;
 import org.graalvm.nativeimage.impl.ReflectionRegistry;
 
-import com.oracle.graal.pointsto.BigBang;
-import com.oracle.graal.pointsto.flow.FieldTypeFlow;
-import com.oracle.graal.pointsto.flow.TypeFlow;
 import com.oracle.graal.pointsto.meta.AnalysisField;
 import com.oracle.graal.pointsto.meta.AnalysisMethod;
 import com.oracle.graal.pointsto.meta.AnalysisType;
@@ -324,23 +320,10 @@ public class JNIAccessFeature implements Feature {
         } else if (field.isStatic() && field.isFinal()) {
             MaterializedConstantFields.singleton().register(field);
         }
-        // Same as BigBang.addSystemField() and BigBang.addSystemStaticField():
-        // create type flows for any subtype of the field's declared type
 
         SvmStaticAnalysisEngine staticAnalysisEngine = access.getStaticAnalysisEngine();
-        if (staticAnalysisEngine instanceof BigBang) {
-            BigBang bigBang = (BigBang) staticAnalysisEngine;
-            // todo(d-kozak) encapsulate points-to
-            TypeFlow<?> declaredTypeFlow = field.getType().getTypeFlow(bigBang, true);
-            if (field.isStatic()) {
-                declaredTypeFlow.addUse(bigBang, field.getStaticFieldFlow());
-            } else {
-                FieldTypeFlow instanceFieldFlow = field.getDeclaringClass().getContextInsensitiveAnalysisObject().getInstanceFieldFlow(bigBang, field, writable);
-                declaredTypeFlow.addUse(bigBang, instanceFieldFlow);
-            }
-        } else {
-            throw VMError.shouldNotReachHere("unhandled for reachability yet");
-        }
+        // todo(d-kozak) push more code from this method behind this virtual call?
+        staticAnalysisEngine.handleJNIAccess(field, writable);
     }
 
     @Override

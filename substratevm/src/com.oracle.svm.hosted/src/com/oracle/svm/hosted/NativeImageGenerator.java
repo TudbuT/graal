@@ -1427,8 +1427,8 @@ public class NativeImageGenerator {
     private void checkUniverse() {
         if (!(analysis instanceof BigBang)) {
             // todo(d-kozak) what to check for reachability?
-            // move into the analysis itself or into the universe? - virtual dispatch instead of if
-            // statement
+            // move into the analysis itself or into the universe? - virtual dispatch instead of an
+            // if
             return;
         }
         BigBang bigbang = (BigBang) this.analysis;

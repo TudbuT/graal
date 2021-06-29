@@ -44,6 +44,7 @@ import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 
+import com.oracle.graal.pointsto.flow.FieldTypeFlow;
 import com.oracle.graal.pointsto.reports.StatisticsPrinter;
 import org.graalvm.compiler.api.replacements.SnippetReflectionProvider;
 import org.graalvm.compiler.core.common.SuppressFBWarnings;
@@ -290,6 +291,19 @@ public abstract class BigBang implements StaticAnalysisEngine {
              * observers, i.e., of the unsafe store.
              */
             this.postFlow(unsafeStore.receiver());
+        }
+    }
+
+    @Override
+    public void handleJNIAccess(AnalysisField field, boolean writable) {
+        // Same as addSystemField() and addSystemStaticField():
+        // create type flows for any subtype of the field's declared type
+        TypeFlow<?> declaredTypeFlow = field.getType().getTypeFlow(this, true);
+        if (field.isStatic()) {
+            declaredTypeFlow.addUse(this, field.getStaticFieldFlow());
+        } else {
+            FieldTypeFlow instanceFieldFlow = field.getDeclaringClass().getContextInsensitiveAnalysisObject().getInstanceFieldFlow(this, field, writable);
+            declaredTypeFlow.addUse(this, instanceFieldFlow);
         }
     }
 

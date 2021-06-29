@@ -241,7 +241,6 @@ public class FeatureImpl {
         }
 
         Set<AnalysisMethod> reachableMethodOverrides(AnalysisMethod baseMethod) {
-            // todo(d-kozak) compute this information during analysis in reachability?
             return AnalysisUniverse.getMethodImplementations(getStaticAnalysisEngine(), baseMethod);
         }
     }
