@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -48,6 +48,7 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
+import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
 import org.graalvm.compiler.debug.DebugContext;
 import org.graalvm.compiler.graph.NodeInputList;
 import org.graalvm.compiler.nodes.Invoke;
@@ -61,7 +62,6 @@ import org.graalvm.nativeimage.ImageSingletons;
 import org.graalvm.nativeimage.hosted.Feature;
 import org.graalvm.polyglot.io.FileSystem;
 
-import com.oracle.graal.pointsto.BigBang;
 import com.oracle.graal.pointsto.flow.InvokeTypeFlow;
 import com.oracle.graal.pointsto.meta.AnalysisMethod;
 import com.oracle.graal.pointsto.meta.AnalysisType;
@@ -186,32 +186,32 @@ public class PermissionsFeature implements Feature {
         FeatureImpl.AfterAnalysisAccessImpl accessImpl = (FeatureImpl.AfterAnalysisAccessImpl) access;
         DebugContext debugContext = accessImpl.getDebugContext();
         try (DebugContext.Scope s = debugContext.scope(ClassUtil.getUnqualifiedName(getClass()))) {
-            BigBang bigbang = accessImpl.getBigBang();
-            WhiteListParser parser = new WhiteListParser(accessImpl.getImageClassLoader(), bigbang);
+            SvmStaticAnalysisEngine analysis = accessImpl.getStaticAnalysisEngine();
+            WhiteListParser parser = new WhiteListParser(accessImpl.getImageClassLoader(), analysis);
             ConfigurationParserUtils.parseAndRegisterConfigurations(parser,
                             accessImpl.getImageClassLoader(),
                             ClassUtil.getUnqualifiedName(getClass()),
                             Options.TruffleTCKPermissionsExcludeFiles,
                             new ResourceAsOptionDecorator(getClass().getPackage().getName().replace('.', '/') + "/resources/jre.json"),
                             CONFIG);
-            reflectionProxy = bigbang.forClass("com.oracle.svm.reflect.helpers.ReflectionProxy");
-            reflectionFieldAccessorFactory = bigbang.forClass(Package_jdk_internal_reflect.getQualifiedName() + ".UnsafeFieldAccessorFactory");
+            reflectionProxy = analysis.forClass("com.oracle.svm.reflect.helpers.ReflectionProxy");
+            reflectionFieldAccessorFactory = analysis.forClass(Package_jdk_internal_reflect.getQualifiedName() + ".UnsafeFieldAccessorFactory");
             VMError.guarantee(reflectionProxy != null && reflectionFieldAccessorFactory != null, "Cannot load one or several reflection types");
             whiteList = parser.getLoadedWhiteList();
             Set<AnalysisMethod> deniedMethods = new HashSet<>();
-            deniedMethods.addAll(findMethods(bigbang, SecurityManager.class, (m) -> m.getName().startsWith("check")));
-            deniedMethods.addAll(findMethods(bigbang, sun.misc.Unsafe.class, (m) -> m.isPublic()));
+            deniedMethods.addAll(findMethods(analysis, SecurityManager.class, (m) -> m.getName().startsWith("check")));
+            deniedMethods.addAll(findMethods(analysis, sun.misc.Unsafe.class, (m) -> m.isPublic()));
             // The type of the host Java NIO FileSystem.
             // The FileSystem obtained from the FileSystem.newDefaultFileSystem() is in the Truffle
             // package but
             // can be directly used by a language. We need to include it into deniedMethods.
-            deniedMethods.addAll(findMethods(bigbang, FileSystem.newDefaultFileSystem().getClass(), (m) -> m.isPublic()));
+            deniedMethods.addAll(findMethods(analysis, FileSystem.newDefaultFileSystem().getClass(), (m) -> m.isPublic()));
             if (!deniedMethods.isEmpty()) {
-                Map<AnalysisMethod, Set<AnalysisMethod>> cg = callGraph(bigbang, deniedMethods, debugContext);
+                Map<AnalysisMethod, Set<AnalysisMethod>> cg = callGraph(analysis, deniedMethods, debugContext);
                 List<List<AnalysisMethod>> report = new ArrayList<>();
                 Set<CallGraphFilter> contextFilters = new HashSet<>();
-                Collections.addAll(contextFilters, new SafeInterruptRecognizer(bigbang), new SafePrivilegedRecognizer(bigbang),
-                                new SafeServiceLoaderRecognizer(bigbang, accessImpl.getImageClassLoader()));
+                Collections.addAll(contextFilters, new SafeInterruptRecognizer(analysis), new SafePrivilegedRecognizer(analysis),
+                                new SafeServiceLoaderRecognizer(analysis, accessImpl.getImageClassLoader()));
                 int maxStackDepth = Options.TruffleTCKPermissionsMaxStackTraceDepth.getValue();
                 maxStackDepth = maxStackDepth == -1 ? Integer.MAX_VALUE : maxStackDepth;
                 for (AnalysisMethod deniedMethod : deniedMethods) {
@@ -247,17 +247,17 @@ public class PermissionsFeature implements Feature {
      * called method in {@code targets} or transitive caller of {@code targets} the resulting
      * {@code Map} contains an entry holding all direct callers of the method in the entry value.
      *
-     * @param bigbang the {@link BigBang}
+     * @param analysis the {@link SvmStaticAnalysisEngine}
      * @param targets the target methods to build call graph for
      * @param debugContext the {@link DebugContext}
      */
     private Map<AnalysisMethod, Set<AnalysisMethod>> callGraph(
-                    BigBang bigbang,
+                    SvmStaticAnalysisEngine analysis,
                     Set<AnalysisMethod> targets,
                     DebugContext debugContext) {
         Deque<AnalysisMethod> todo = new LinkedList<>();
         Map<AnalysisMethod, Set<AnalysisMethod>> visited = new HashMap<>();
-        for (AnalysisMethod m : bigbang.getUniverse().getMethods()) {
+        for (AnalysisMethod m : analysis.getUniverse().getMethods()) {
             if (m.isEntryPoint()) {
                 visited.put(m, new HashSet<>());
                 todo.offer(m);
@@ -368,7 +368,7 @@ public class PermissionsFeature implements Feature {
      * @param maxDepth maximal call trace depth
      * @param maxReports maximal number of reports
      * @param callGraph call graph obtained from
-     *            {@link PermissionsFeature#callGraph(com.oracle.graal.pointsto.BigBang, java.util.Set, org.graalvm.compiler.debug.DebugContext)}
+     *            {@link PermissionsFeature#callGraph(com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine, java.util.Set, org.graalvm.compiler.debug.DebugContext)}
      * @param contextFilters filters removing known valid calls
      * @param visited visited methods
      * @param depth current depth
@@ -496,50 +496,50 @@ public class PermissionsFeature implements Feature {
     /**
      * Finds methods declared in {@code owner} class using {@code filter} predicate.
      *
-     * @param bigBang the {@link BigBang}
+     * @param analysis the {@link SvmStaticAnalysisEngine}
      * @param owner the class which methods should be listed
      * @param filter the predicate filtering methods declared in {@code owner}
      * @return the methods accepted by {@code filter}
      * @throws IllegalStateException if owner cannot be resolved
      */
-    private static Set<AnalysisMethod> findMethods(BigBang bigBang, Class<?> owner, Predicate<ResolvedJavaMethod> filter) {
-        AnalysisType clazz = bigBang.forClass(owner);
+    private static Set<AnalysisMethod> findMethods(SvmStaticAnalysisEngine analysis, Class<?> owner, Predicate<ResolvedJavaMethod> filter) {
+        AnalysisType clazz = analysis.forClass(owner);
         if (clazz == null) {
             throw new IllegalStateException("Cannot resolve " + owner.getName() + ".");
         }
-        return findMethods(bigBang, clazz, filter);
+        return findMethods(analysis, clazz, filter);
     }
 
     /**
      * Finds methods declared in {@code owner} {@link AnalysisType} using {@code filter} predicate.
      *
-     * @param bigBang the {@link BigBang}
+     * @param analysis the {@link SvmStaticAnalysisEngine}
      * @param owner the {@link AnalysisType} which methods should be listed
      * @param filter the predicate filtering methods declared in {@code owner}
      * @return the methods accepted by {@code filter}
      */
-    static Set<AnalysisMethod> findMethods(BigBang bigBang, AnalysisType owner, Predicate<ResolvedJavaMethod> filter) {
-        return findImpl(bigBang, owner.getWrappedWithoutResolve().getDeclaredMethods(), filter);
+    static Set<AnalysisMethod> findMethods(SvmStaticAnalysisEngine analysis, AnalysisType owner, Predicate<ResolvedJavaMethod> filter) {
+        return findImpl(analysis, owner.getWrappedWithoutResolve().getDeclaredMethods(), filter);
     }
 
     /**
      * Finds constructors declared in {@code owner} {@link AnalysisType} using {@code filter}
      * predicate.
      *
-     * @param bigBang the {@link BigBang}
+     * @param analysis the {@link SvmStaticAnalysisEngine}
      * @param owner the {@link AnalysisType} which constructors should be listed
      * @param filter the predicate filtering constructors declared in {@code owner}
      * @return the constructors accepted by {@code filter}
      */
-    static Set<AnalysisMethod> findConstructors(BigBang bigBang, AnalysisType owner, Predicate<ResolvedJavaMethod> filter) {
-        return findImpl(bigBang, owner.getWrappedWithoutResolve().getDeclaredConstructors(), filter);
+    static Set<AnalysisMethod> findConstructors(SvmStaticAnalysisEngine analysis, AnalysisType owner, Predicate<ResolvedJavaMethod> filter) {
+        return findImpl(analysis, owner.getWrappedWithoutResolve().getDeclaredConstructors(), filter);
     }
 
-    private static Set<AnalysisMethod> findImpl(BigBang bigBang, ResolvedJavaMethod[] methods, Predicate<ResolvedJavaMethod> filter) {
+    private static Set<AnalysisMethod> findImpl(SvmStaticAnalysisEngine analysis, ResolvedJavaMethod[] methods, Predicate<ResolvedJavaMethod> filter) {
         Set<AnalysisMethod> result = new HashSet<>();
         for (ResolvedJavaMethod m : methods) {
             if (filter.test(m)) {
-                result.add(bigBang.getUniverse().lookup(m));
+                result.add(analysis.getUniverse().lookup(m));
             }
         }
         return result;
@@ -579,15 +579,15 @@ public class PermissionsFeature implements Feature {
         private final ResolvedJavaMethod threadInterrupt;
         private final ResolvedJavaMethod threadCurrentThread;
 
-        SafeInterruptRecognizer(BigBang bigBang) {
-            this.hostVM = (SVMHost) bigBang.getHostVM();
+        SafeInterruptRecognizer(SvmStaticAnalysisEngine analysis) {
+            this.hostVM = analysis.getHostVM();
 
-            Set<AnalysisMethod> methods = findMethods(bigBang, Thread.class, (m) -> m.getName().equals("interrupt"));
+            Set<AnalysisMethod> methods = findMethods(analysis, Thread.class, (m) -> m.getName().equals("interrupt"));
             if (methods.size() != 1) {
                 throw new IllegalStateException("Failed to lookup Thread.interrupt().");
             }
             threadInterrupt = methods.iterator().next();
-            methods = findMethods(bigBang, Thread.class, (m) -> m.getName().equals("currentThread"));
+            methods = findMethods(analysis, Thread.class, (m) -> m.getName().equals("currentThread"));
             if (methods.size() != 1) {
                 throw new IllegalStateException("Failed to lookup Thread.currentThread().");
             }
@@ -625,9 +625,9 @@ public class PermissionsFeature implements Feature {
         private final SVMHost hostVM;
         private final Set<AnalysisMethod> dopriviledged;
 
-        SafePrivilegedRecognizer(BigBang bigbang) {
-            this.hostVM = (SVMHost) bigbang.getHostVM();
-            this.dopriviledged = findMethods(bigbang, java.security.AccessController.class, (m) -> m.getName().equals("doPrivileged") || m.getName().equals("doPrivilegedWithCombiner"));
+        SafePrivilegedRecognizer(SvmStaticAnalysisEngine analysis) {
+            this.hostVM = analysis.getHostVM();
+            this.dopriviledged = findMethods(analysis, java.security.AccessController.class, (m) -> m.getName().equals("doPrivileged") || m.getName().equals("doPrivilegedWithCombiner"));
         }
 
         @Override
@@ -683,9 +683,9 @@ public class PermissionsFeature implements Feature {
         private final ResolvedJavaMethod nextService;
         private final ImageClassLoader imageClassLoader;
 
-        SafeServiceLoaderRecognizer(BigBang bigBang, ImageClassLoader imageClassLoader) {
-            AnalysisType serviceLoaderIterator = bigBang.forClass("java.util.ServiceLoader$LazyIterator");
-            Set<AnalysisMethod> methods = findMethods(bigBang, serviceLoaderIterator, (m) -> m.getName().equals("nextService"));
+        SafeServiceLoaderRecognizer(SvmStaticAnalysisEngine analysis, ImageClassLoader imageClassLoader) {
+            AnalysisType serviceLoaderIterator = analysis.forClass("java.util.ServiceLoader$LazyIterator");
+            Set<AnalysisMethod> methods = findMethods(analysis, serviceLoaderIterator, (m) -> m.getName().equals("nextService"));
             if (methods.size() != 1) {
                 throw new IllegalStateException("Failed to lookup ServiceLoader$LazyIterator.nextService().");
             }

@@ -100,4 +100,8 @@ public interface StaticAnalysisEngine {
     HeapScanningPolicy scanningPolicy();
 
     DebugContext getDebug();
+
+    AnalysisType forClass(Class<?> clazz);
+
+    AnalysisType forClass(String className);
 }
