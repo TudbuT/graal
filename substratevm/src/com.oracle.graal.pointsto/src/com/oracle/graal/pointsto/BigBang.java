@@ -207,6 +207,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
         return strengthenGraalGraphs;
     }
 
+    @Override
     public AnalysisType[] skippedHeapTypes() {
         return new AnalysisType[]{metaAccess.lookupJavaType(String.class)};
     }
@@ -219,18 +220,22 @@ public abstract class BigBang implements StaticAnalysisEngine {
         return trackTypeFlowInputs;
     }
 
+    @Override
     public boolean reportAnalysisStatistics() {
         return reportAnalysisStatistics;
     }
 
+    @Override
     public OptionValues getOptions() {
         return options;
     }
 
+    @Override
     public List<DebugHandlersFactory> getDebugHandlerFactories() {
         return debugHandlerFactories;
     }
 
+    @Override
     public DebugContext getDebug() {
         return debug;
     }
@@ -254,6 +259,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
      * @param field the newly unsafe registered field. We use its declaring type to filter the
      *            unsafe access flows that need to be updated.
      */
+    @Override
     public void forceUnsafeUpdate(AnalysisField field) {
         /*
          * It is cheaper to post the flows of all loads and stores even if they are not related to
@@ -302,6 +308,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
         return true;
     }
 
+    @Override
     public void cleanupAfterAnalysis() {
         allSynchronizedTypeFlow = null;
         unsafeLoads = null;
@@ -315,6 +322,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
         universe.getMethods().forEach(AnalysisMethod::cleanupAfterAnalysis);
     }
 
+    @Override
     public AnalysisPolicy analysisPolicy() {
         return universe.analysisPolicy();
     }
@@ -323,14 +331,17 @@ public abstract class BigBang implements StaticAnalysisEngine {
         return universe.analysisPolicy().getContextPolicy();
     }
 
+    @Override
     public AnalysisUniverse getUniverse() {
         return universe;
     }
 
+    @Override
     public HostedProviders getProviders() {
         return providers;
     }
 
+    @Override
     public AnalysisMetaAccess getMetaAccess() {
         return metaAccess;
     }
@@ -339,6 +350,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
         return replacements;
     }
 
+    @Override
     public UnsupportedFeatures getUnsupportedFeatures() {
         return unsupportedFeatures;
     }
@@ -371,10 +383,12 @@ public abstract class BigBang implements StaticAnalysisEngine {
         return metaAccess.lookupJavaType(Thread.class);
     }
 
+    @Override
     public AnalysisType forClass(Class<?> clazz) {
         return metaAccess.lookupJavaType(clazz);
     }
 
+    @Override
     public AnalysisType forClass(String className) {
         try {
             return forClass(Class.forName(className));
@@ -391,6 +405,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
         return allSynchronizedTypeFlow;
     }
 
+    @Override
     public TypeState getAllSynchronizedTypeState() {
         /*
          * If all-synchrnonized type flow, i.e., the type flow that keeps track of the types of all
@@ -407,12 +422,14 @@ public abstract class BigBang implements StaticAnalysisEngine {
         return executor.isStarted();
     }
 
+    @Override
     public AnalysisMethod addRootMethod(Executable method) {
         AnalysisMethod aMethod = metaAccess.lookupJavaMethod(method);
         addRootMethod(aMethod);
         return aMethod;
     }
 
+    @Override
     @SuppressWarnings("try")
     public AnalysisMethod addRootMethod(AnalysisMethod aMethod) {
         if (aMethod.isRootMethod()) {
@@ -453,6 +470,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
         return aMethod;
     }
 
+    @Override
     public AnalysisType addSystemClass(Class<?> clazz, boolean addFields, boolean addArrayClass) {
         AnalysisType type = metaAccess.lookupJavaType(clazz);
         type.registerAsReachable();
@@ -483,6 +501,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
         return type;
     }
 
+    @Override
     @SuppressWarnings("try")
     public AnalysisType addSystemField(Class<?> clazz, String fieldName) {
         AnalysisType type = addSystemClass(clazz, false, false);
@@ -521,6 +540,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
         }
     }
 
+    @Override
     public void addSystemMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
         try {
             Method method = clazz.getDeclaredMethod(methodName, parameterTypes);
@@ -530,10 +550,12 @@ public abstract class BigBang implements StaticAnalysisEngine {
         }
     }
 
+    @Override
     public final SnippetReflectionProvider getSnippetReflectionProvider() {
         return providers.getSnippetReflection();
     }
 
+    @Override
     public final ConstantReflectionProvider getConstantReflectionProvider() {
         return providers.getConstantReflection();
     }
@@ -546,6 +568,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
         return executor;
     }
 
+    @Override
     public void checkUserLimitations() {
     }
 
@@ -597,6 +620,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
      * @return Returns true if any changes are made, i.e. if any type flows are updated
      */
     @SuppressWarnings("try")
+    @Override
     public boolean finish() throws InterruptedException {
         try (Indent indent = debug.logAndIndent("starting analysis in BigBang.finish")) {
             universe.setAnalysisDataValid(this, false);
@@ -659,6 +683,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
         AnalysisType.updateAssignableTypes(this);
     }
 
+    @Override
     public HeapScanningPolicy scanningPolicy() {
         return heapScanningPolicy;
     }
@@ -671,6 +696,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
     protected void checkObjectGraph(ObjectScanner objectScanner) {
     }
 
+    @Override
     public HostVM getHostVM() {
         return hostVM;
     }

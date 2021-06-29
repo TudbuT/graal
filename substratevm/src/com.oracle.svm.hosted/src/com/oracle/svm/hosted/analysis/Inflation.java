@@ -249,6 +249,7 @@ public class Inflation extends BigBang implements SvmStaticAnalysisEngine {
         }
     }
 
+    @Override
     public AnnotationSubstitutionProcessor getAnnotationSubstitutionProcessor() {
         return annotationSubstitutionProcessor;
     }

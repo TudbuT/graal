@@ -33,14 +33,17 @@ import jdk.vm.ci.meta.ConstantReflectionProvider;
 
 public interface SvmStaticAnalysisEngine extends StaticAnalysisEngine {
 
+    @Override
     SVMHost getHostVM();
 
+    @Override
     HostedProviders getProviders();
 
     AnnotationSubstitutionProcessor getAnnotationSubstitutionProcessor();
 
     SubstrateReplacements getReplacements();
 
+    @Override
     ConstantReflectionProvider getConstantReflectionProvider();
 
     Runnable getHeartbeatCallback();
