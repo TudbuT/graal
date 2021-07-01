@@ -24,43 +24,46 @@
  */
 package com.oracle.graal.pointsto;
 
-import com.oracle.graal.pointsto.api.HostVM;
-import com.oracle.graal.pointsto.constraints.UnsupportedFeatures;
-import com.oracle.graal.pointsto.meta.HostedProviders;
-import com.oracle.graal.pointsto.util.Timer;
-import jdk.vm.ci.meta.ConstantReflectionProvider;
-import org.graalvm.compiler.api.replacements.SnippetReflectionProvider;
-import org.graalvm.compiler.debug.DebugContext;
-import org.graalvm.compiler.debug.DebugHandlersFactory;
-import org.graalvm.compiler.options.OptionValues;
+import com.oracle.graal.pointsto.meta.AnalysisField;
+import com.oracle.graal.pointsto.meta.AnalysisMetaAccess;
+import com.oracle.graal.pointsto.meta.AnalysisMethod;
+import com.oracle.graal.pointsto.meta.AnalysisType;
+import com.oracle.graal.pointsto.meta.AnalysisUniverse;
+import com.oracle.graal.pointsto.typestate.TypeState;
 
-import java.io.PrintWriter;
-import java.util.List;
+import java.lang.reflect.Executable;
 
-public interface StaticAnalysisEngine extends ReachabilityAnalysis {
-    HostVM getHostVM();
+public interface ReachabilityAnalysis {
 
-    UnsupportedFeatures getUnsupportedFeatures();
+    AnalysisType addSystemClass(Class<?> clazz, boolean addFields, boolean addArrayClass);
 
-    void checkUserLimitations();
+    AnalysisType addSystemField(Class<?> clazz, String fieldName);
 
-    OptionValues getOptions();
+    AnalysisMethod addRootMethod(AnalysisMethod aMethod);
 
-    HostedProviders getProviders();
+    AnalysisMethod addRootMethod(Executable method);
 
-    List<DebugHandlersFactory> getDebugHandlerFactories();
+    void addSystemMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes);
 
-    Timer getAnalysisTimer();
+    boolean finish() throws InterruptedException;
 
-    Timer getProcessFeaturesTimer();
+    void cleanupAfterAnalysis();
 
-    void printTimers();
+    boolean reportAnalysisStatistics();
 
-    void printTimerStatistics(PrintWriter out);
+    void forceUnsafeUpdate(AnalysisField field);
 
-    ConstantReflectionProvider getConstantReflectionProvider();
+    AnalysisType[] skippedHeapTypes();
 
-    SnippetReflectionProvider getSnippetReflectionProvider();
+    void handleJNIAccess(AnalysisField field, boolean writable);
 
-    DebugContext getDebug();
+    HeapScanningPolicy scanningPolicy();
+
+    TypeState getAllSynchronizedTypeState();
+
+    AnalysisMetaAccess getMetaAccess();
+
+    AnalysisUniverse getUniverse();
+
+    AnalysisPolicy analysisPolicy();
 }
