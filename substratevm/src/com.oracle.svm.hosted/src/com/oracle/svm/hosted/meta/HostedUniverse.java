@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
+import com.oracle.svm.hosted.analysis.NativeImageStaticAnalysisEngine;
 import org.graalvm.compiler.api.replacements.SnippetReflectionProvider;
 
 import com.oracle.graal.pointsto.constraints.UnsupportedFeatureException;
@@ -61,7 +61,7 @@ import jdk.vm.ci.meta.Signature;
  * Nothing is added later on during compilation of methods.
  */
 public class HostedUniverse implements Universe {
-    protected final SvmStaticAnalysisEngine analysis;
+    protected final NativeImageStaticAnalysisEngine analysis;
 
     protected final Map<AnalysisType, HostedType> types = new HashMap<>();
     protected final Map<AnalysisField, HostedField> fields = new HashMap<>();
@@ -75,7 +75,7 @@ public class HostedUniverse implements Universe {
     protected List<HostedMethod> orderedMethods;
     protected List<HostedField> orderedFields;
 
-    public HostedUniverse(SvmStaticAnalysisEngine analysis) {
+    public HostedUniverse(NativeImageStaticAnalysisEngine analysis) {
         this.analysis = analysis;
     }
 
@@ -217,7 +217,7 @@ public class HostedUniverse implements Universe {
         return orderedMethods;
     }
 
-    public SvmStaticAnalysisEngine getStaticAnalysis() {
+    public NativeImageStaticAnalysisEngine getStaticAnalysis() {
         return analysis;
     }
 

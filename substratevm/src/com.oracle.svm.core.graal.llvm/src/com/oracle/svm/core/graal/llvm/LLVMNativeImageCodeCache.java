@@ -43,7 +43,7 @@ import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
+import com.oracle.svm.hosted.analysis.NativeImageStaticAnalysisEngine;
 import org.graalvm.compiler.code.CompilationResult;
 import org.graalvm.compiler.core.common.NumUtil;
 import org.graalvm.compiler.debug.DebugContext;
@@ -113,7 +113,7 @@ public class LLVMNativeImageCodeCache extends NativeImageCodeCache {
 
     @Override
     @SuppressWarnings({"unused", "try"})
-    public void layoutMethods(DebugContext debug, String imageName, SvmStaticAnalysisEngine analysis, ForkJoinPool threadPool) {
+    public void layoutMethods(DebugContext debug, String imageName, NativeImageStaticAnalysisEngine analysis, ForkJoinPool threadPool) {
         try (Indent indent = debug.logAndIndent("layout methods")) {
             BatchExecutor executor = new BatchExecutor(analysis, threadPool);
             try (StopTimer t = new Timer(imageName, "(bitcode)").start()) {
@@ -434,7 +434,7 @@ public class LLVMNativeImageCodeCache extends NativeImageCodeCache {
     private static final class BatchExecutor {
         private CompletionExecutor executor;
 
-        private BatchExecutor(SvmStaticAnalysisEngine analysis, ForkJoinPool threadPool) {
+        private BatchExecutor(NativeImageStaticAnalysisEngine analysis, ForkJoinPool threadPool) {
             this.executor = new CompletionExecutor(analysis, threadPool, analysis.getHeartbeatCallback());
             executor.init();
         }

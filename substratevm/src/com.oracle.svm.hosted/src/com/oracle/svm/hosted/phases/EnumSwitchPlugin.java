@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
+import com.oracle.svm.hosted.analysis.NativeImageStaticAnalysisEngine;
 import org.graalvm.compiler.api.replacements.SnippetReflectionProvider;
 import org.graalvm.compiler.debug.GraalError;
 import org.graalvm.compiler.nodes.ConstantNode;
@@ -132,7 +132,7 @@ final class EnumSwitchPluginRegistry extends IntrinsificationPluginRegistry {
 @AutomaticFeature
 final class EnumSwitchFeature implements GraalFeature {
 
-    SvmStaticAnalysisEngine analysis;
+    NativeImageStaticAnalysisEngine analysis;
 
     final ConcurrentMap<AnalysisMethod, Boolean> methodsSafeForExecution = new ConcurrentHashMap<>();
 

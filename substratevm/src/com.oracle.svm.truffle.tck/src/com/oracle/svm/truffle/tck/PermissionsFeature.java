@@ -48,7 +48,7 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
-import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
+import com.oracle.svm.hosted.analysis.NativeImageStaticAnalysisEngine;
 import org.graalvm.compiler.debug.DebugContext;
 import org.graalvm.compiler.graph.NodeInputList;
 import org.graalvm.compiler.nodes.Invoke;
@@ -186,7 +186,7 @@ public class PermissionsFeature implements Feature {
         FeatureImpl.AfterAnalysisAccessImpl accessImpl = (FeatureImpl.AfterAnalysisAccessImpl) access;
         DebugContext debugContext = accessImpl.getDebugContext();
         try (DebugContext.Scope s = debugContext.scope(ClassUtil.getUnqualifiedName(getClass()))) {
-            SvmStaticAnalysisEngine analysis = accessImpl.getStaticAnalysisEngine();
+            NativeImageStaticAnalysisEngine analysis = accessImpl.getStaticAnalysisEngine();
             WhiteListParser parser = new WhiteListParser(accessImpl.getImageClassLoader(), analysis);
             ConfigurationParserUtils.parseAndRegisterConfigurations(parser,
                             accessImpl.getImageClassLoader(),
@@ -247,12 +247,12 @@ public class PermissionsFeature implements Feature {
      * called method in {@code targets} or transitive caller of {@code targets} the resulting
      * {@code Map} contains an entry holding all direct callers of the method in the entry value.
      *
-     * @param analysis the {@link SvmStaticAnalysisEngine}
+     * @param analysis the {@link NativeImageStaticAnalysisEngine}
      * @param targets the target methods to build call graph for
      * @param debugContext the {@link DebugContext}
      */
     private Map<AnalysisMethod, Set<AnalysisMethod>> callGraph(
-                    SvmStaticAnalysisEngine analysis,
+                    NativeImageStaticAnalysisEngine analysis,
                     Set<AnalysisMethod> targets,
                     DebugContext debugContext) {
         Deque<AnalysisMethod> todo = new LinkedList<>();
@@ -368,7 +368,7 @@ public class PermissionsFeature implements Feature {
      * @param maxDepth maximal call trace depth
      * @param maxReports maximal number of reports
      * @param callGraph call graph obtained from
-     *            {@link PermissionsFeature#callGraph(com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine, java.util.Set, org.graalvm.compiler.debug.DebugContext)}
+     *            {@link PermissionsFeature#callGraph(NativeImageStaticAnalysisEngine, java.util.Set, org.graalvm.compiler.debug.DebugContext)}
      * @param contextFilters filters removing known valid calls
      * @param visited visited methods
      * @param depth current depth
@@ -496,13 +496,13 @@ public class PermissionsFeature implements Feature {
     /**
      * Finds methods declared in {@code owner} class using {@code filter} predicate.
      *
-     * @param analysis the {@link SvmStaticAnalysisEngine}
+     * @param analysis the {@link NativeImageStaticAnalysisEngine}
      * @param owner the class which methods should be listed
      * @param filter the predicate filtering methods declared in {@code owner}
      * @return the methods accepted by {@code filter}
      * @throws IllegalStateException if owner cannot be resolved
      */
-    private static Set<AnalysisMethod> findMethods(SvmStaticAnalysisEngine analysis, Class<?> owner, Predicate<ResolvedJavaMethod> filter) {
+    private static Set<AnalysisMethod> findMethods(NativeImageStaticAnalysisEngine analysis, Class<?> owner, Predicate<ResolvedJavaMethod> filter) {
         AnalysisType clazz = analysis.forClass(owner);
         if (clazz == null) {
             throw new IllegalStateException("Cannot resolve " + owner.getName() + ".");
@@ -513,12 +513,12 @@ public class PermissionsFeature implements Feature {
     /**
      * Finds methods declared in {@code owner} {@link AnalysisType} using {@code filter} predicate.
      *
-     * @param analysis the {@link SvmStaticAnalysisEngine}
+     * @param analysis the {@link NativeImageStaticAnalysisEngine}
      * @param owner the {@link AnalysisType} which methods should be listed
      * @param filter the predicate filtering methods declared in {@code owner}
      * @return the methods accepted by {@code filter}
      */
-    static Set<AnalysisMethod> findMethods(SvmStaticAnalysisEngine analysis, AnalysisType owner, Predicate<ResolvedJavaMethod> filter) {
+    static Set<AnalysisMethod> findMethods(NativeImageStaticAnalysisEngine analysis, AnalysisType owner, Predicate<ResolvedJavaMethod> filter) {
         return findImpl(analysis, owner.getWrappedWithoutResolve().getDeclaredMethods(), filter);
     }
 
@@ -526,16 +526,16 @@ public class PermissionsFeature implements Feature {
      * Finds constructors declared in {@code owner} {@link AnalysisType} using {@code filter}
      * predicate.
      *
-     * @param analysis the {@link SvmStaticAnalysisEngine}
+     * @param analysis the {@link NativeImageStaticAnalysisEngine}
      * @param owner the {@link AnalysisType} which constructors should be listed
      * @param filter the predicate filtering constructors declared in {@code owner}
      * @return the constructors accepted by {@code filter}
      */
-    static Set<AnalysisMethod> findConstructors(SvmStaticAnalysisEngine analysis, AnalysisType owner, Predicate<ResolvedJavaMethod> filter) {
+    static Set<AnalysisMethod> findConstructors(NativeImageStaticAnalysisEngine analysis, AnalysisType owner, Predicate<ResolvedJavaMethod> filter) {
         return findImpl(analysis, owner.getWrappedWithoutResolve().getDeclaredConstructors(), filter);
     }
 
-    private static Set<AnalysisMethod> findImpl(SvmStaticAnalysisEngine analysis, ResolvedJavaMethod[] methods, Predicate<ResolvedJavaMethod> filter) {
+    private static Set<AnalysisMethod> findImpl(NativeImageStaticAnalysisEngine analysis, ResolvedJavaMethod[] methods, Predicate<ResolvedJavaMethod> filter) {
         Set<AnalysisMethod> result = new HashSet<>();
         for (ResolvedJavaMethod m : methods) {
             if (filter.test(m)) {
@@ -579,7 +579,7 @@ public class PermissionsFeature implements Feature {
         private final ResolvedJavaMethod threadInterrupt;
         private final ResolvedJavaMethod threadCurrentThread;
 
-        SafeInterruptRecognizer(SvmStaticAnalysisEngine analysis) {
+        SafeInterruptRecognizer(NativeImageStaticAnalysisEngine analysis) {
             this.hostVM = analysis.getHostVM();
 
             Set<AnalysisMethod> methods = findMethods(analysis, Thread.class, (m) -> m.getName().equals("interrupt"));
@@ -625,7 +625,7 @@ public class PermissionsFeature implements Feature {
         private final SVMHost hostVM;
         private final Set<AnalysisMethod> dopriviledged;
 
-        SafePrivilegedRecognizer(SvmStaticAnalysisEngine analysis) {
+        SafePrivilegedRecognizer(NativeImageStaticAnalysisEngine analysis) {
             this.hostVM = analysis.getHostVM();
             this.dopriviledged = findMethods(analysis, java.security.AccessController.class, (m) -> m.getName().equals("doPrivileged") || m.getName().equals("doPrivilegedWithCombiner"));
         }
@@ -683,7 +683,7 @@ public class PermissionsFeature implements Feature {
         private final ResolvedJavaMethod nextService;
         private final ImageClassLoader imageClassLoader;
 
-        SafeServiceLoaderRecognizer(SvmStaticAnalysisEngine analysis, ImageClassLoader imageClassLoader) {
+        SafeServiceLoaderRecognizer(NativeImageStaticAnalysisEngine analysis, ImageClassLoader imageClassLoader) {
             AnalysisType serviceLoaderIterator = analysis.forClass("java.util.ServiceLoader$LazyIterator");
             Set<AnalysisMethod> methods = findMethods(analysis, serviceLoaderIterator, (m) -> m.getName().equals("nextService"));
             if (methods.size() != 1) {

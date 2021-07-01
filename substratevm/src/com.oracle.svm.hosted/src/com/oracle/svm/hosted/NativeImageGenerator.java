@@ -58,7 +58,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
+import com.oracle.svm.hosted.analysis.NativeImageStaticAnalysisEngine;
 import org.graalvm.collections.EconomicSet;
 import org.graalvm.collections.Pair;
 import org.graalvm.compiler.api.replacements.Fold;
@@ -301,7 +301,7 @@ public class NativeImageGenerator {
     private DeadlockWatchdog watchdog;
     private AnalysisUniverse aUniverse;
     private HostedUniverse hUniverse;
-    private SvmStaticAnalysisEngine analysis;
+    private NativeImageStaticAnalysisEngine analysis;
     private NativeLibraries nativeLibraries;
     private AbstractImage image;
     private AtomicBoolean buildStarted = new AtomicBoolean();
@@ -951,7 +951,7 @@ public class NativeImageGenerator {
     }
 
     @SuppressWarnings("try")
-    public static void initializeBigBang(SvmStaticAnalysisEngine analysis, OptionValues options, FeatureHandler featureHandler, NativeLibraries nativeLibraries, DebugContext debug,
+    public static void initializeBigBang(NativeImageStaticAnalysisEngine analysis, OptionValues options, FeatureHandler featureHandler, NativeLibraries nativeLibraries, DebugContext debug,
                     AnalysisMetaAccess aMetaAccess, SubstitutionProcessor substitutions, ImageClassLoader loader, boolean initForeignCalls, ClassInitializationPlugin classInitializationPlugin) {
         SubstrateReplacements aReplacements = analysis.getReplacements();
         HostedProviders aProviders = analysis.getProviders();
@@ -1589,7 +1589,7 @@ public class NativeImageGenerator {
         return image;
     }
 
-    public SvmStaticAnalysisEngine getAnalysis() {
+    public NativeImageStaticAnalysisEngine getAnalysis() {
         return analysis;
     }
 

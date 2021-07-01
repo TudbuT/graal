@@ -36,7 +36,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
+import com.oracle.svm.hosted.analysis.NativeImageStaticAnalysisEngine;
 import org.graalvm.compiler.api.replacements.Fold;
 import org.graalvm.compiler.options.Option;
 import org.graalvm.nativeimage.ImageSingletons;
@@ -321,7 +321,7 @@ public class JNIAccessFeature implements Feature {
             MaterializedConstantFields.singleton().register(field);
         }
 
-        SvmStaticAnalysisEngine staticAnalysisEngine = access.getStaticAnalysisEngine();
+        NativeImageStaticAnalysisEngine staticAnalysisEngine = access.getStaticAnalysisEngine();
         // todo(d-kozak) push more code from this method behind this virtual call?
         staticAnalysisEngine.handleJNIAccess(field, writable);
     }

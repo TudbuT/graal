@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
+import com.oracle.svm.hosted.analysis.NativeImageStaticAnalysisEngine;
 import org.graalvm.graphio.GraphOutput;
 import org.graalvm.graphio.GraphStructure;
 import org.graalvm.nativeimage.hosted.Feature.OnAnalysisExitAccess;
@@ -489,7 +489,7 @@ class PointsToJsonObject extends JsonObject {
             return;
         }
         FeatureImpl.OnAnalysisExitAccessImpl config = (FeatureImpl.OnAnalysisExitAccessImpl) access;
-        SvmStaticAnalysisEngine analysis = config.getStaticAnalysisEngine();
+        NativeImageStaticAnalysisEngine analysis = config.getStaticAnalysisEngine();
         VMError.guarantee(analysis instanceof BigBang, "Printing points-to statistics only make sense when point-to analysis is on.");
         BigBang bigbang = (BigBang) analysis;
         serializeMethods(bigbang);

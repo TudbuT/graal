@@ -42,7 +42,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
+import com.oracle.svm.hosted.analysis.NativeImageStaticAnalysisEngine;
 import org.graalvm.compiler.api.replacements.Fold;
 import org.graalvm.compiler.api.runtime.GraalRuntime;
 import org.graalvm.compiler.core.common.spi.MetaAccessExtensionProvider;
@@ -510,7 +510,7 @@ public final class GraalFeature implements Feature {
     }
 
     @SuppressWarnings("try")
-    private void processMethod(CallTreeNode node, Deque<CallTreeNode> worklist, SvmStaticAnalysisEngine analysis) {
+    private void processMethod(CallTreeNode node, Deque<CallTreeNode> worklist, NativeImageStaticAnalysisEngine analysis) {
         AnalysisMethod method = node.implementationMethod;
         assert method.isImplementationInvoked();
 

@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
+import com.oracle.svm.hosted.analysis.NativeImageStaticAnalysisEngine;
 import org.graalvm.nativeimage.ImageSingletons;
 import org.graalvm.nativeimage.c.function.CFunctionPointer;
 import org.graalvm.nativeimage.hosted.Feature;
@@ -48,7 +48,7 @@ import jdk.vm.ci.meta.ResolvedJavaType;
 
 public final class CEntryPointCallStubSupport {
 
-    static void initialize(SvmStaticAnalysisEngine analysis) {
+    static void initialize(NativeImageStaticAnalysisEngine analysis) {
         ImageSingletons.add(CEntryPointCallStubSupport.class, new CEntryPointCallStubSupport(analysis));
     }
 
@@ -56,7 +56,7 @@ public final class CEntryPointCallStubSupport {
         return ImageSingletons.lookup(CEntryPointCallStubSupport.class);
     }
 
-    private final SvmStaticAnalysisEngine analysis;
+    private final NativeImageStaticAnalysisEngine analysis;
     private final Map<AnalysisMethod, AnalysisMethod> methodToStub = new ConcurrentHashMap<>();
     private final Map<AnalysisMethod, AnalysisMethod> methodToJavaStub = new ConcurrentHashMap<>();
     private NativeLibraries nativeLibraries;
@@ -67,7 +67,7 @@ public final class CEntryPointCallStubSupport {
      */
     private final ConcurrentHashMap<CFunctionPointer, BoxedRelocatedPointer> cFunctionPointerCache = new ConcurrentHashMap<>();
 
-    private CEntryPointCallStubSupport(SvmStaticAnalysisEngine analysis) {
+    private CEntryPointCallStubSupport(NativeImageStaticAnalysisEngine analysis) {
         this.analysis = analysis;
     }
 

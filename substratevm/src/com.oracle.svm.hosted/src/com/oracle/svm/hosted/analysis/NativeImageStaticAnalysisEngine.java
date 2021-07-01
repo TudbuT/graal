@@ -31,7 +31,7 @@ import com.oracle.svm.hosted.SVMHost;
 import com.oracle.svm.hosted.substitute.AnnotationSubstitutionProcessor;
 import jdk.vm.ci.meta.ConstantReflectionProvider;
 
-public interface SvmStaticAnalysisEngine extends StaticAnalysisEngine {
+public interface NativeImageStaticAnalysisEngine extends StaticAnalysisEngine {
 
     @Override
     SVMHost getHostVM();

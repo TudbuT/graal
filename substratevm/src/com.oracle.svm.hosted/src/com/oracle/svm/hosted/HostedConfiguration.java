@@ -33,7 +33,7 @@ import java.util.concurrent.ForkJoinPool;
 
 import com.oracle.graal.pointsto.StaticAnalysisEngine;
 import com.oracle.svm.core.util.VMError;
-import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
+import com.oracle.svm.hosted.analysis.NativeImageStaticAnalysisEngine;
 import org.graalvm.compiler.api.replacements.SnippetReflectionProvider;
 import org.graalvm.compiler.core.common.CompressEncoding;
 import org.graalvm.compiler.debug.DebugContext;
@@ -172,7 +172,7 @@ public class HostedConfiguration {
         }
     }
 
-    public AbstractAnalysisResultsBuilder createStaticAnalysisResultsBuilder(SvmStaticAnalysisEngine analysis, HostedUniverse universe) {
+    public AbstractAnalysisResultsBuilder createStaticAnalysisResultsBuilder(NativeImageStaticAnalysisEngine analysis, HostedUniverse universe) {
         if (analysis instanceof BigBang) {
             BigBang bb = (BigBang) analysis;
             if (SubstrateOptions.parseOnce()) {

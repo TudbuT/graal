@@ -86,7 +86,7 @@ import jdk.vm.ci.meta.JavaConstant;
 import jdk.vm.ci.meta.JavaKind;
 import jdk.vm.ci.meta.ResolvedJavaType;
 
-public class Inflation extends BigBang implements SvmStaticAnalysisEngine {
+public class Inflation extends BigBang implements NativeImageStaticAnalysisEngine {
     private Set<AnalysisField> handledUnknownValueFields;
     private Map<GenericInterfacesEncodingKey, Type[]> genericInterfacesMap;
     private Map<AnnotatedInterfacesEncodingKey, AnnotatedType[]> annotatedInterfacesMap;

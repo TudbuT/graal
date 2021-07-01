@@ -35,7 +35,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
+import com.oracle.svm.hosted.analysis.NativeImageStaticAnalysisEngine;
 import org.graalvm.nativeimage.Platforms;
 
 import com.oracle.graal.pointsto.meta.AnalysisMethod;
@@ -56,10 +56,10 @@ final class WhiteListParser extends ConfigurationParser {
     private static final String CONSTRUCTOR_NAME = "<init>";
 
     private final ImageClassLoader imageClassLoader;
-    private final SvmStaticAnalysisEngine analysis;
+    private final NativeImageStaticAnalysisEngine analysis;
     private Set<AnalysisMethod> whiteList;
 
-    WhiteListParser(ImageClassLoader imageClassLoader, SvmStaticAnalysisEngine analysis) {
+    WhiteListParser(ImageClassLoader imageClassLoader, NativeImageStaticAnalysisEngine analysis) {
         this.imageClassLoader = Objects.requireNonNull(imageClassLoader, "ImageClassLoader must be non null");
         this.analysis = Objects.requireNonNull(analysis, "BigBang must be non null");
     }
@@ -285,9 +285,9 @@ final class WhiteListParser extends ConfigurationParser {
 
         private final ResolvedJavaType owner;
         private final List<? extends ResolvedJavaType> params;
-        private final SvmStaticAnalysisEngine analysis;
+        private final NativeImageStaticAnalysisEngine analysis;
 
-        SignaturePredicate(AnalysisType owner, List<? extends ResolvedJavaType> params, SvmStaticAnalysisEngine analysis) {
+        SignaturePredicate(AnalysisType owner, List<? extends ResolvedJavaType> params, NativeImageStaticAnalysisEngine analysis) {
             this.owner = Objects.requireNonNull(owner, "Owner must be non null.").getWrappedWithoutResolve();
             this.params = Objects.requireNonNull(params, "Params must be non null.");
             this.analysis = Objects.requireNonNull(analysis, "Analysis must be non null.");

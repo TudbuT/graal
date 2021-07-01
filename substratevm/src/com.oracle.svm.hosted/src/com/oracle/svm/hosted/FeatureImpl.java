@@ -45,7 +45,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import com.oracle.svm.hosted.analysis.SvmStaticAnalysisEngine;
+import com.oracle.svm.hosted.analysis.NativeImageStaticAnalysisEngine;
 import org.graalvm.collections.Pair;
 import org.graalvm.compiler.debug.DebugContext;
 import org.graalvm.compiler.phases.util.Providers;
@@ -181,14 +181,14 @@ public class FeatureImpl {
 
     abstract static class AnalysisAccessBase extends FeatureAccessImpl {
 
-        protected final SvmStaticAnalysisEngine analysis;
+        protected final NativeImageStaticAnalysisEngine analysis;
 
-        AnalysisAccessBase(FeatureHandler featureHandler, ImageClassLoader imageClassLoader, SvmStaticAnalysisEngine analysis, DebugContext debugContext) {
+        AnalysisAccessBase(FeatureHandler featureHandler, ImageClassLoader imageClassLoader, NativeImageStaticAnalysisEngine analysis, DebugContext debugContext) {
             super(featureHandler, imageClassLoader, debugContext);
             this.analysis = analysis;
         }
 
-        public SvmStaticAnalysisEngine getStaticAnalysisEngine() {
+        public NativeImageStaticAnalysisEngine getStaticAnalysisEngine() {
             return analysis;
         }
 
@@ -247,7 +247,7 @@ public class FeatureImpl {
 
     public static class DuringSetupAccessImpl extends AnalysisAccessBase implements Feature.DuringSetupAccess {
 
-        public DuringSetupAccessImpl(FeatureHandler featureHandler, ImageClassLoader imageClassLoader, SvmStaticAnalysisEngine analysis, DebugContext debugContext) {
+        public DuringSetupAccessImpl(FeatureHandler featureHandler, ImageClassLoader imageClassLoader, NativeImageStaticAnalysisEngine analysis, DebugContext debugContext) {
             super(featureHandler, imageClassLoader, analysis, debugContext);
         }
 
@@ -290,7 +290,7 @@ public class FeatureImpl {
 
         private final NativeLibraries nativeLibraries;
 
-        public BeforeAnalysisAccessImpl(FeatureHandler featureHandler, ImageClassLoader imageClassLoader, SvmStaticAnalysisEngine analysis, NativeLibraries nativeLibraries,
+        public BeforeAnalysisAccessImpl(FeatureHandler featureHandler, ImageClassLoader imageClassLoader, NativeImageStaticAnalysisEngine analysis, NativeLibraries nativeLibraries,
                         DebugContext debugContext) {
             super(featureHandler, imageClassLoader, analysis, debugContext);
             this.nativeLibraries = nativeLibraries;
@@ -433,7 +433,7 @@ public class FeatureImpl {
 
         private boolean requireAnalysisIteration;
 
-        public DuringAnalysisAccessImpl(FeatureHandler featureHandler, ImageClassLoader imageClassLoader, SvmStaticAnalysisEngine analysis, NativeLibraries nativeLibraries,
+        public DuringAnalysisAccessImpl(FeatureHandler featureHandler, ImageClassLoader imageClassLoader, NativeImageStaticAnalysisEngine analysis, NativeLibraries nativeLibraries,
                         DebugContext debugContext) {
             super(featureHandler, imageClassLoader, analysis, nativeLibraries, debugContext);
         }
@@ -451,13 +451,13 @@ public class FeatureImpl {
     }
 
     public static class AfterAnalysisAccessImpl extends AnalysisAccessBase implements Feature.AfterAnalysisAccess {
-        public AfterAnalysisAccessImpl(FeatureHandler featureHandler, ImageClassLoader imageClassLoader, SvmStaticAnalysisEngine analysis, DebugContext debugContext) {
+        public AfterAnalysisAccessImpl(FeatureHandler featureHandler, ImageClassLoader imageClassLoader, NativeImageStaticAnalysisEngine analysis, DebugContext debugContext) {
             super(featureHandler, imageClassLoader, analysis, debugContext);
         }
     }
 
     public static class OnAnalysisExitAccessImpl extends AnalysisAccessBase implements Feature.OnAnalysisExitAccess {
-        public OnAnalysisExitAccessImpl(FeatureHandler featureHandler, ImageClassLoader imageClassLoader, SvmStaticAnalysisEngine analysis, DebugContext debugContext) {
+        public OnAnalysisExitAccessImpl(FeatureHandler featureHandler, ImageClassLoader imageClassLoader, NativeImageStaticAnalysisEngine analysis, DebugContext debugContext) {
             super(featureHandler, imageClassLoader, analysis, debugContext);
         }
     }
