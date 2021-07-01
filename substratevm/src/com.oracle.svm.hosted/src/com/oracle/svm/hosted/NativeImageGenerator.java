@@ -980,17 +980,17 @@ public class NativeImageGenerator {
          * good example.
          */
         try (Indent ignored = debug.logAndIndent("add initial classes/fields/methods")) {
-            analysis.addSystemClass(Object.class, false, false).registerAsInHeap();
-            analysis.addSystemField(DynamicHub.class, "vtable");
-            analysis.addSystemClass(String.class, false, false).registerAsInHeap();
-            analysis.addSystemClass(String[].class, false, false).registerAsInHeap();
-            analysis.addSystemField(String.class, "value").registerAsInHeap();
-            analysis.addSystemClass(long[].class, false, false).registerAsInHeap();
-            analysis.addSystemClass(byte[].class, false, false).registerAsInHeap();
-            analysis.addSystemClass(byte[][].class, false, false).registerAsInHeap();
-            analysis.addSystemClass(Object[].class, false, false).registerAsInHeap();
-            analysis.addSystemClass(CFunctionPointer[].class, false, false).registerAsInHeap();
-            analysis.addSystemClass(PointerBase[].class, false, false).registerAsInHeap();
+            analysis.addRootClass(Object.class, false, false).registerAsInHeap();
+            analysis.addRootField(DynamicHub.class, "vtable");
+            analysis.addRootClass(String.class, false, false).registerAsInHeap();
+            analysis.addRootClass(String[].class, false, false).registerAsInHeap();
+            analysis.addRootField(String.class, "value").registerAsInHeap();
+            analysis.addRootClass(long[].class, false, false).registerAsInHeap();
+            analysis.addRootClass(byte[].class, false, false).registerAsInHeap();
+            analysis.addRootClass(byte[][].class, false, false).registerAsInHeap();
+            analysis.addRootClass(Object[].class, false, false).registerAsInHeap();
+            analysis.addRootClass(CFunctionPointer[].class, false, false).registerAsInHeap();
+            analysis.addRootClass(PointerBase[].class, false, false).registerAsInHeap();
 
             try {
                 analysis.addRootMethod(ArraycopySnippets.class.getDeclaredMethod("doArraycopy", Object.class, int.class, Object.class, int.class, int.class));
@@ -1001,10 +1001,10 @@ public class NativeImageGenerator {
 
             for (JavaKind kind : JavaKind.values()) {
                 if (kind.isPrimitive() && kind != JavaKind.Void) {
-                    analysis.addSystemClass(kind.toJavaClass(), false, true);
-                    analysis.addSystemField(kind.toBoxedJavaClass(), "value");
-                    analysis.addSystemMethod(kind.toBoxedJavaClass(), "valueOf", kind.toJavaClass());
-                    analysis.addSystemMethod(kind.toBoxedJavaClass(), kind.getJavaName() + "Value");
+                    analysis.addRootClass(kind.toJavaClass(), false, true);
+                    analysis.addRootField(kind.toBoxedJavaClass(), "value");
+                    analysis.addRootMethod(kind.toBoxedJavaClass(), "valueOf", kind.toJavaClass());
+                    analysis.addRootMethod(kind.toBoxedJavaClass(), kind.getJavaName() + "Value");
                     /*
                      * Register the cache location as reachable.
                      * BoxingSnippets$Templates#getCacheLocation accesses the cache field.

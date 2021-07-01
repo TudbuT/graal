@@ -24,42 +24,17 @@
  */
 package com.oracle.graal.pointsto;
 
+import com.oracle.graal.pointsto.flow.context.object.AnalysisObject;
 import com.oracle.graal.pointsto.meta.AnalysisField;
-import com.oracle.graal.pointsto.meta.AnalysisMetaAccess;
-import com.oracle.graal.pointsto.meta.AnalysisMethod;
 import com.oracle.graal.pointsto.meta.AnalysisType;
-import com.oracle.graal.pointsto.meta.AnalysisUniverse;
-import com.oracle.graal.pointsto.typestate.TypeState;
+import jdk.vm.ci.meta.JavaConstant;
 
-import java.lang.reflect.Executable;
+public interface HeapScanning {
+    void scanRoot(AnalysisField field, JavaConstant receiver);
 
-public interface ReachabilityAnalysis {
+    void scanRoot(AnalysisObject object);
 
-    AnalysisType addRootClass(Class<?> clazz, boolean addFields, boolean addArrayClass);
+    AnalysisType[] skippedHeapTypes();
 
-    AnalysisType addRootField(Class<?> clazz, String fieldName);
-
-    AnalysisMethod addRootMethod(AnalysisMethod aMethod);
-
-    AnalysisMethod addRootMethod(Executable method);
-
-    AnalysisMethod addRootMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes);
-
-    boolean finish() throws InterruptedException;
-
-    void cleanupAfterAnalysis();
-
-    boolean reportAnalysisStatistics();
-
-    void forceUnsafeUpdate(AnalysisField field);
-
-    void handleJNIAccess(AnalysisField field, boolean writable);
-
-    TypeState getAllSynchronizedTypeState();
-
-    AnalysisMetaAccess getMetaAccess();
-
-    AnalysisUniverse getUniverse();
-
-    AnalysisPolicy analysisPolicy();
+    HeapScanningPolicy scanningPolicy();
 }

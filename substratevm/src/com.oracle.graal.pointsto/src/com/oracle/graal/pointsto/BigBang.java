@@ -85,7 +85,6 @@ import com.oracle.graal.pointsto.util.Timer.StopTimer;
 import com.oracle.svm.util.ClassUtil;
 import com.oracle.svm.util.ImageGeneratorThreadMarker;
 
-import jdk.vm.ci.common.JVMCIError;
 import jdk.vm.ci.meta.ConstantReflectionProvider;
 import jdk.vm.ci.meta.JavaKind;
 import jdk.vm.ci.meta.JavaType;
@@ -471,15 +470,15 @@ public abstract class BigBang implements StaticAnalysisEngine {
     }
 
     @Override
-    public AnalysisType addSystemClass(Class<?> clazz, boolean addFields, boolean addArrayClass) {
+    public AnalysisType addRootClass(Class<?> clazz, boolean addFields, boolean addArrayClass) {
         AnalysisType type = metaAccess.lookupJavaType(clazz);
         type.registerAsReachable();
-        return addSystemClass(type, addFields, addArrayClass);
+        return addRootClass(type, addFields, addArrayClass);
     }
 
     @SuppressWarnings({"try"})
-    private AnalysisType addSystemClass(AnalysisType type, boolean addFields, boolean addArrayClass) {
-        try (Indent indent = debug.logAndIndent("add system class %s", type.getName())) {
+    private AnalysisType addRootClass(AnalysisType type, boolean addFields, boolean addArrayClass) {
+        try (Indent indent = debug.logAndIndent("add root class %s", type.getName())) {
             for (AnalysisField field : type.getInstanceFields(false)) {
                 if (addFields) {
                     field.registerAsAccessed();
@@ -492,10 +491,10 @@ public abstract class BigBang implements StaticAnalysisEngine {
                 fieldDeclaredTypeFlow.addUse(this, type.getContextInsensitiveAnalysisObject().getInstanceFieldFlow(this, field, true));
             }
             if (type.getSuperclass() != null) {
-                addSystemClass(type.getSuperclass(), addFields, addArrayClass);
+                addRootClass(type.getSuperclass(), addFields, addArrayClass);
             }
             if (addArrayClass) {
-                addSystemClass(type.getArrayClass(), false, false);
+                addRootClass(type.getArrayClass(), false, false);
             }
         }
         return type;
@@ -503,11 +502,11 @@ public abstract class BigBang implements StaticAnalysisEngine {
 
     @Override
     @SuppressWarnings("try")
-    public AnalysisType addSystemField(Class<?> clazz, String fieldName) {
-        AnalysisType type = addSystemClass(clazz, false, false);
+    public AnalysisType addRootField(Class<?> clazz, String fieldName) {
+        AnalysisType type = addRootClass(clazz, false, false);
         for (AnalysisField field : type.getInstanceFields(true)) {
             if (field.getName().equals(fieldName)) {
-                try (Indent indent = debug.logAndIndent("add system field %s in class %s", fieldName, clazz.getName())) {
+                try (Indent indent = debug.logAndIndent("add root field %s in class %s", fieldName, clazz.getName())) {
                     field.registerAsAccessed();
                     /*
                      * For system classes any instantiated (sub)type of the declared field type can
@@ -524,7 +523,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
 
     @SuppressWarnings("try")
     public AnalysisType addSystemStaticField(Class<?> clazz, String fieldName) {
-        addSystemClass(clazz, false, false);
+        addRootClass(clazz, false, false);
         Field reflectField;
         try {
             try (Indent indent = debug.logAndIndent("add system static field %s in class %s", fieldName, clazz.getName())) {
@@ -541,10 +540,10 @@ public abstract class BigBang implements StaticAnalysisEngine {
     }
 
     @Override
-    public void addSystemMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
+    public AnalysisMethod addRootMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
         try {
             Method method = clazz.getDeclaredMethod(methodName, parameterTypes);
-            addRootMethod(method);
+            return addRootMethod(method);
         } catch (NoSuchMethodException ex) {
             throw shouldNotReachHere(ex);
         }

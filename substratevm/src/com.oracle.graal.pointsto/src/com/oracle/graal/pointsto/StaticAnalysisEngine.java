@@ -37,7 +37,7 @@ import org.graalvm.compiler.options.OptionValues;
 import java.io.PrintWriter;
 import java.util.List;
 
-public interface StaticAnalysisEngine extends ReachabilityAnalysis {
+public interface StaticAnalysisEngine extends ReachabilityAnalysis, HeapScanning {
     HostVM getHostVM();
 
     UnsupportedFeatures getUnsupportedFeatures();
