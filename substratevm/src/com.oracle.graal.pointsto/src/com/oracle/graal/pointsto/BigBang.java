@@ -45,7 +45,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 
 import com.oracle.graal.pointsto.flow.FieldTypeFlow;
+import com.oracle.graal.pointsto.flow.context.object.AnalysisObject;
 import com.oracle.graal.pointsto.reports.StatisticsPrinter;
+import jdk.vm.ci.meta.JavaConstant;
 import org.graalvm.compiler.api.replacements.SnippetReflectionProvider;
 import org.graalvm.compiler.core.common.SuppressFBWarnings;
 import org.graalvm.compiler.core.common.spi.ConstantFieldProvider;
@@ -693,6 +695,16 @@ public abstract class BigBang implements StaticAnalysisEngine {
      * @param objectScanner
      */
     protected void checkObjectGraph(ObjectScanner objectScanner) {
+    }
+
+    @Override
+    public void scanRoot(AnalysisField field, JavaConstant receiver) {
+        // todo implement
+    }
+
+    @Override
+    public void scanRoot(AnalysisObject object) {
+        // todo implement
     }
 
     @Override
