@@ -1026,7 +1026,7 @@ public class NativeImageGenerator {
 
             if (!PointstoOptions.UseReachabilityAnalysis.getValue(options)) {
                 for (StructuredGraph graph : aReplacements.getSnippetGraphs(GraalOptions.TrackNodeSourcePosition.getValue(options), options)) {
-                    HostedConfiguration.instance().createMethodTypeFlowBuilder(analysis, graph).registerUsedElements(false);
+                    HostedConfiguration.instance().createMethodTypeFlowBuilder(((Inflation) analysis), graph).registerUsedElements(false);
                 }
             }
         }
