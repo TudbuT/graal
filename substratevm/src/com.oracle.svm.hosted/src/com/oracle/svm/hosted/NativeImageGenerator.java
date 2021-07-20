@@ -1425,49 +1425,45 @@ public class NativeImageGenerator {
     }
 
     private void checkUniverse() {
-        if (!(analysis instanceof BigBang)) {
-            // todo(d-kozak) what to check for reachability?
-            // move into the analysis itself or into the universe? - virtual dispatch instead of an
-            // if
-            return;
-        }
-        BigBang bigbang = (BigBang) this.analysis;
-        /*
-         * Check that the type states for method parameters and fields are compatible with the
-         * declared type. This is required for interface types because interfaces are not trusted
-         * according to the Java language specification, but we trust all interface types (see
-         * HostedType.isTrustedInterfaceType)
-         *
-         * TODO Enable checks for non-interface types too.
-         */
-        for (AnalysisMethod method : aUniverse.getMethods()) {
-            for (int i = 0; i < method.getTypeFlow().getOriginalMethodFlows().getParameters().length; i++) {
-                TypeState parameterState = method.getTypeFlow().getParameterTypeState(bigbang, i);
-                if (parameterState != null) {
-                    AnalysisType declaredType = method.getTypeFlow().getOriginalMethodFlows().getParameter(i).getDeclaredType();
-                    if (declaredType.isInterface()) {
-                        TypeState declaredTypeState = declaredType.getTypeFlow(bigbang, true).getState();
-                        parameterState = TypeState.forSubtraction(bigbang, parameterState, declaredTypeState);
-                        if (!parameterState.isEmpty()) {
-                            String methodKey = method.format("%H.%n(%p)");
-                            bigbang.getUnsupportedFeatures().addMessage(methodKey, method,
-                                            "Parameter " + i + " of " + methodKey + " has declared type " + declaredType.toJavaName(true) +
-                                                            " with state " + declaredTypeState + " which is incompatible with types in parameter state: " + parameterState);
+        if (analysis instanceof BigBang) {
+            BigBang bigbang = (BigBang) this.analysis;
+            /*
+             * Check that the type states for method parameters and fields are compatible with the
+             * declared type. This is required for interface types because interfaces are not
+             * trusted according to the Java language specification, but we trust all interface
+             * types (see HostedType.isTrustedInterfaceType)
+             *
+             * TODO Enable checks for non-interface types too.
+             */
+            for (AnalysisMethod method : aUniverse.getMethods()) {
+                for (int i = 0; i < method.getTypeFlow().getOriginalMethodFlows().getParameters().length; i++) {
+                    TypeState parameterState = method.getTypeFlow().getParameterTypeState(bigbang, i);
+                    if (parameterState != null) {
+                        AnalysisType declaredType = method.getTypeFlow().getOriginalMethodFlows().getParameter(i).getDeclaredType();
+                        if (declaredType.isInterface()) {
+                            TypeState declaredTypeState = declaredType.getTypeFlow(bigbang, true).getState();
+                            parameterState = TypeState.forSubtraction(bigbang, parameterState, declaredTypeState);
+                            if (!parameterState.isEmpty()) {
+                                String methodKey = method.format("%H.%n(%p)");
+                                bigbang.getUnsupportedFeatures().addMessage(methodKey, method,
+                                                "Parameter " + i + " of " + methodKey + " has declared type " + declaredType.toJavaName(true) +
+                                                                " with state " + declaredTypeState + " which is incompatible with types in parameter state: " + parameterState);
+                            }
                         }
                     }
                 }
             }
-        }
-        for (AnalysisField field : aUniverse.getFields()) {
-            TypeState state = field.getTypeState();
-            if (state != null) {
-                AnalysisType declaredType = field.getType();
-                if (declaredType.isInterface()) {
-                    state = TypeState.forSubtraction(bigbang, state, declaredType.getTypeFlow(bigbang, true).getState());
-                    if (!state.isEmpty()) {
-                        String fieldKey = field.format("%H.%n");
-                        analysis.getUnsupportedFeatures().addMessage(fieldKey, null,
-                                        "Field " + fieldKey + " has declared type " + declaredType.toJavaName(true) + " which is incompatible with types in state: " + state);
+            for (AnalysisField field : aUniverse.getFields()) {
+                TypeState state = field.getTypeState();
+                if (state != null) {
+                    AnalysisType declaredType = field.getType();
+                    if (declaredType.isInterface()) {
+                        state = TypeState.forSubtraction(bigbang, state, declaredType.getTypeFlow(bigbang, true).getState());
+                        if (!state.isEmpty()) {
+                            String fieldKey = field.format("%H.%n");
+                            analysis.getUnsupportedFeatures().addMessage(fieldKey, null,
+                                            "Field " + fieldKey + " has declared type " + declaredType.toJavaName(true) + " which is incompatible with types in state: " + state);
+                        }
                     }
                 }
             }

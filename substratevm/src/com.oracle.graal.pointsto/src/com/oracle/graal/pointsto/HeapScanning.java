@@ -24,16 +24,9 @@
  */
 package com.oracle.graal.pointsto;
 
-import com.oracle.graal.pointsto.flow.context.object.AnalysisObject;
-import com.oracle.graal.pointsto.meta.AnalysisField;
 import com.oracle.graal.pointsto.meta.AnalysisType;
-import jdk.vm.ci.meta.JavaConstant;
 
 public interface HeapScanning {
-    void scanRoot(AnalysisField field, JavaConstant receiver);
-
-    void scanRoot(AnalysisObject object);
-
     AnalysisType[] skippedHeapTypes();
 
     HeapScanningPolicy scanningPolicy();

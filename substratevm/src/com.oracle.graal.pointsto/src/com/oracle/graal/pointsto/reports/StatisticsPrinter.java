@@ -152,8 +152,7 @@ public final class StatisticsPrinter {
 
     private static long[] getTypeCheckStats(StaticAnalysisEngine analysis) {
         if (!(analysis instanceof BigBang)) {
-            // todo(d-kozak) hide behind virtual method?
-            // create a DTO?
+            /*- Type check stats are only available if points-to analysis is on. */
             return new long[4];
         }
         BigBang bb = (BigBang) analysis;

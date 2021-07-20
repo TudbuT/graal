@@ -45,9 +45,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 
 import com.oracle.graal.pointsto.flow.FieldTypeFlow;
-import com.oracle.graal.pointsto.flow.context.object.AnalysisObject;
 import com.oracle.graal.pointsto.reports.StatisticsPrinter;
-import jdk.vm.ci.meta.JavaConstant;
 import org.graalvm.compiler.api.replacements.SnippetReflectionProvider;
 import org.graalvm.compiler.core.common.SuppressFBWarnings;
 import org.graalvm.compiler.core.common.spi.ConstantFieldProvider;
@@ -296,8 +294,8 @@ public abstract class BigBang implements StaticAnalysisEngine {
     }
 
     @Override
-    public void handleJNIAccess(AnalysisField field, boolean writable) {
-        // Same as addSystemField() and addSystemStaticField():
+    public void registerAsJNIAccessed(AnalysisField field, boolean writable) {
+        // Same as addRootField() and addRootStaticField():
         // create type flows for any subtype of the field's declared type
         TypeFlow<?> declaredTypeFlow = field.getType().getTypeFlow(this, true);
         if (field.isStatic()) {
@@ -524,7 +522,7 @@ public abstract class BigBang implements StaticAnalysisEngine {
     }
 
     @SuppressWarnings("try")
-    public AnalysisType addSystemStaticField(Class<?> clazz, String fieldName) {
+    public AnalysisType addRootStaticField(Class<?> clazz, String fieldName) {
         addRootClass(clazz, false, false);
         Field reflectField;
         try {
@@ -695,16 +693,6 @@ public abstract class BigBang implements StaticAnalysisEngine {
      * @param objectScanner
      */
     protected void checkObjectGraph(ObjectScanner objectScanner) {
-    }
-
-    @Override
-    public void scanRoot(AnalysisField field, JavaConstant receiver) {
-        // todo implement
-    }
-
-    @Override
-    public void scanRoot(AnalysisObject object) {
-        // todo implement
     }
 
     @Override

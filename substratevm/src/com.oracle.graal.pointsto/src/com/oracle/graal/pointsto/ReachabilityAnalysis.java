@@ -53,7 +53,7 @@ public interface ReachabilityAnalysis {
 
     void forceUnsafeUpdate(AnalysisField field);
 
-    void handleJNIAccess(AnalysisField field, boolean writable);
+    void registerAsJNIAccessed(AnalysisField field, boolean writable);
 
     TypeState getAllSynchronizedTypeState();
 

@@ -334,8 +334,6 @@ public class MultiTypeState extends TypeState {
     @Override
     public boolean closeToAllInstantiated(StaticAnalysisEngine analysis) {
         if (!(analysis instanceof BigBang)) {
-            // todo(d-kozak) points to agnostic way?
-            // shouldn't be that hard
             return false;
         }
         BigBang bb = (BigBang) analysis;

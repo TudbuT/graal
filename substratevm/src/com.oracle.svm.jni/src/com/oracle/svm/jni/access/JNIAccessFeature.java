@@ -322,8 +322,7 @@ public class JNIAccessFeature implements Feature {
         }
 
         NativeImageStaticAnalysisEngine staticAnalysisEngine = access.getStaticAnalysisEngine();
-        // todo(d-kozak) push more code from this method behind this virtual call?
-        staticAnalysisEngine.handleJNIAccess(field, writable);
+        staticAnalysisEngine.registerAsJNIAccessed(field, writable);
     }
 
     @Override
