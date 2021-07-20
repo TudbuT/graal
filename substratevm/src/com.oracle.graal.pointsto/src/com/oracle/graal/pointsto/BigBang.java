@@ -220,7 +220,6 @@ public abstract class BigBang implements StaticAnalysisEngine {
         return trackTypeFlowInputs;
     }
 
-    @Override
     public boolean reportAnalysisStatistics() {
         return reportAnalysisStatistics;
     }
@@ -252,13 +251,6 @@ public abstract class BigBang implements StaticAnalysisEngine {
         unsafeStores.putIfAbsent(unsafeStore, true);
     }
 
-    /**
-     * Force update of the unsafe loads and unsafe store type flows when a field is registered as
-     * unsafe accessed 'on the fly', i.e., during the analysis.
-     *
-     * @param field the newly unsafe registered field. We use its declaring type to filter the
-     *            unsafe access flows that need to be updated.
-     */
     @Override
     public void forceUnsafeUpdate(AnalysisField field) {
         /*

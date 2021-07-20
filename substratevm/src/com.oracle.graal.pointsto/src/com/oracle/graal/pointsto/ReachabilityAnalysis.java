@@ -33,33 +33,87 @@ import com.oracle.graal.pointsto.typestate.TypeState;
 
 import java.lang.reflect.Executable;
 
+/**
+ * Interface to be used to query and change the state of the static analysis in Native Image.
+ *
+ * It is a first small step in a bigger effort to group together all requests changing the analysis
+ * state.
+ */
 public interface ReachabilityAnalysis {
 
+    /**
+     * Marks given class and all its superclasses as reachable.
+     * 
+     * @param clazz class to be marked
+     * @param addFields if true, all instance fiels are marked as accessed
+     * @param addArrayClass if true, the array class is registered as well
+     * @return
+     */
     AnalysisType addRootClass(Class<?> clazz, boolean addFields, boolean addArrayClass);
 
+    /**
+     * Marks given field as accessed.
+     */
     AnalysisType addRootField(Class<?> clazz, String fieldName);
 
+    /**
+     * Marks given method as reachable.
+     */
     AnalysisMethod addRootMethod(AnalysisMethod aMethod);
 
+    /**
+     * Marks given method as reachable.
+     */
     AnalysisMethod addRootMethod(Executable method);
 
+    /**
+     * Marks given method as reachable.
+     */
     AnalysisMethod addRootMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes);
 
+    /**
+     * Waits until the analysis is done.
+     */
     boolean finish() throws InterruptedException;
 
+    /**
+     * Clears all intermediary data to reduce the footprint.
+     */
     void cleanupAfterAnalysis();
 
-    boolean reportAnalysisStatistics();
-
+    /**
+     * Force update of the unsafe loads and unsafe store type flows when a field is registered as
+     * unsafe accessed 'on the fly', i.e., during the analysis.
+     *
+     * @param field the newly unsafe registered field. We use its declaring type to filter the
+     *            unsafe access flows that need to be updated.
+     */
     void forceUnsafeUpdate(AnalysisField field);
 
+    /**
+     * Performs any necessary additional steps required by the analysis to handle JNI accessed
+     * fields.
+     */
     void registerAsJNIAccessed(AnalysisField field, boolean writable);
 
+    /**
+     * @return typestate representing all types that need synchronization
+     */
     TypeState getAllSynchronizedTypeState();
 
+    /**
+     * @return query interface used for looking up analysis objects from java.lang.reflect
+     *         references
+     */
     AnalysisMetaAccess getMetaAccess();
 
+    /**
+     * @return universe containing all known analysis types
+     */
     AnalysisUniverse getUniverse();
 
+    /**
+     * @return policy used when running the analysis
+     */
     AnalysisPolicy analysisPolicy();
 }

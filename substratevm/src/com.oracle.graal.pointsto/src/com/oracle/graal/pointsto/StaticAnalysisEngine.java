@@ -37,11 +37,24 @@ import org.graalvm.compiler.options.OptionValues;
 import java.io.PrintWriter;
 import java.util.List;
 
+/**
+ * Central static analysis interface that groups together the functionality of reachability analysis
+ * and heap scanning and adds utility methods and lifecycle hooks that should be used to query and
+ * change the state of the analysis.
+ * 
+ * In long term, all mutable accessed that change the state of the analysis should go through this
+ * interface.
+ *
+ * @see BigBang
+ */
 public interface StaticAnalysisEngine extends ReachabilityAnalysis, HeapScanning {
     HostVM getHostVM();
 
     UnsupportedFeatures getUnsupportedFeatures();
 
+    /**
+     * Checks if all user defined limitations such as the number of types are satisfied.
+     */
     void checkUserLimitations();
 
     OptionValues getOptions();
@@ -50,12 +63,24 @@ public interface StaticAnalysisEngine extends ReachabilityAnalysis, HeapScanning
 
     List<DebugHandlersFactory> getDebugHandlerFactories();
 
+    /**
+     * @return the timer for measuring the overall duration of the analysis
+     */
     Timer getAnalysisTimer();
 
+    /**
+     * @return the timer for measuring the time spent in features
+     */
     Timer getProcessFeaturesTimer();
 
+    /**
+     * Prints all analysis timers.
+     */
     void printTimers();
 
+    /**
+     * Prints more detailed information about all analysis timers.
+     */
     void printTimerStatistics(PrintWriter out);
 
     ConstantReflectionProvider getConstantReflectionProvider();
