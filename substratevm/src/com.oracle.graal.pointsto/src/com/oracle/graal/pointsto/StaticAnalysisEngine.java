@@ -42,7 +42,7 @@ import java.util.List;
  * and heap scanning and adds utility methods and lifecycle hooks that should be used to query and
  * change the state of the analysis.
  * 
- * In long term, all mutable accessed that change the state of the analysis should go through this
+ * In long term, all mutable accesses that change the state of the analysis should go through this
  * interface.
  *
  * @see BigBang
