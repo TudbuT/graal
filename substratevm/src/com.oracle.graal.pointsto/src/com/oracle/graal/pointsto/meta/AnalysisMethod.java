@@ -40,7 +40,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.oracle.graal.pointsto.StaticAnalysisEngine;
 import org.graalvm.compiler.debug.DebugContext;
@@ -260,8 +259,6 @@ public class AnalysisMethod implements WrappedJavaMethod, GraphProvider, Origina
         return getInvokeLocations().stream().map(location -> (AnalysisMethod) location.getMethod()).collect(Collectors.toSet());
     }
 
-    // todo where to put this class
-    // maybe way too specific for the one use case where it is needed?
     public static class CallContext {
         public final AnalysisMethod callee;
         public final boolean isDirect;
@@ -274,13 +271,14 @@ public class AnalysisMethod implements WrappedJavaMethod, GraphProvider, Origina
         }
     }
 
-    public Stream<CallContext> getCallees() {
+    public List<CallContext> getCallees() {
         return getTypeFlow()
                         .getInvokes()
                         .stream()
                         .flatMap(invoke -> invoke.getCallees()
                                         .stream()
-                                        .map(callee -> new CallContext(callee, invoke.isDirectInvoke(), invoke.getSource())));
+                                        .map(callee -> new CallContext(callee, invoke.isDirectInvoke(), invoke.getSource())))
+                        .collect(Collectors.toList());
     }
 
     /** Get the list of all invoke locations for this method, as inferred by the static analysis. */

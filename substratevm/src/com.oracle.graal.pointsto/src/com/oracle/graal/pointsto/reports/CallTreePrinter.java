@@ -165,9 +165,11 @@ public final class CallTreePrinter {
              * callee was not already processed add it to the tree and to the work list.
              */
             // todo test nothing has been broken here
-            node.method.getCallees()
-                            .sorted((c1, c2) -> methodComparator.compare(c1.callee, c2.callee))
-                            .forEach(context -> processInvoke(context, node, workList));
+            List<AnalysisMethod.CallContext> callees = node.method.getCallees();
+            callees.sort((c1, c2) -> methodComparator.compare(c1.callee, c2.callee));
+            for (AnalysisMethod.CallContext context : callees) {
+                processInvoke(context, node, workList);
+            }
         }
     }
 
