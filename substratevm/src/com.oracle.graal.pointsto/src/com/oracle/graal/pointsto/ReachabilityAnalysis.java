@@ -47,7 +47,6 @@ public interface ReachabilityAnalysis {
      * @param clazz class to be marked
      * @param addFields if true, all instance fiels are marked as accessed
      * @param addArrayClass if true, the array class is registered as well
-     * @return
      */
     AnalysisType addRootClass(Class<?> clazz, boolean addFields, boolean addArrayClass);
 
