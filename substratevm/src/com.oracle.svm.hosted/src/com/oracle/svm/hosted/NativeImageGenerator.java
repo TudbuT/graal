@@ -1024,10 +1024,8 @@ public class NativeImageGenerator {
                             analysis.getAnnotationSubstitutionProcessor(), classInitializationPlugin, analysis.getHostVM().getClassInitializationSupport(), ConfigurationValues.getTarget());
             registerReplacements(debug, featureHandler, null, aProviders, aProviders.getSnippetReflection(), true, initForeignCalls);
 
-            if (!PointstoOptions.UseReachabilityAnalysis.getValue(options)) {
-                for (StructuredGraph graph : aReplacements.getSnippetGraphs(GraalOptions.TrackNodeSourcePosition.getValue(options), options)) {
-                    HostedConfiguration.instance().createMethodTypeFlowBuilder(((Inflation) analysis), graph).registerUsedElements(false);
-                }
+            for (StructuredGraph graph : aReplacements.getSnippetGraphs(GraalOptions.TrackNodeSourcePosition.getValue(options), options)) {
+                HostedConfiguration.instance().createMethodTypeFlowBuilder(((Inflation) analysis), graph).registerUsedElements(false);
             }
         }
     }

@@ -32,9 +32,6 @@ import org.graalvm.compiler.options.OptionKey;
 
 public class PointstoOptions {
 
-    @Option(help = "Use reachability analysis instead of points-to.")//
-    public static final OptionKey<Boolean> UseReachabilityAnalysis = new OptionKey<>(false);
-
     @Option(help = "Enable hybrid context for static methods, i.e. uses invocation site as context for static methods.")//
     public static final OptionKey<Boolean> HybridStaticContext = new OptionKey<>(false);
 
